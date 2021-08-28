@@ -19,6 +19,7 @@ let countdowntitle = '';
 let countdowndate = '';
 let countdownvalue = Date;
 let countdownactive;
+let savedcountdown;
 
 // standard conversion
 const second = 1000;
@@ -38,6 +39,10 @@ function updateDom()
   {
       const now = new Date().getTime();
       const gap = countdownvalue - now;
+            const days = Math.floor(gap / day);
+            const hours = Math.floor((gap % day) / hour);
+            const minutes = Math.floor((gap % hour) / day);
+            const seconds = Math.floor((gap % minute) / second);
 
       inputcontainer.hidden = true;
       if(gap < 0)
@@ -67,6 +72,12 @@ function updatecountdown(e)
   countdowntitle = e.srcElement[0].value;
   countdowndate = e.srcElement[1].value;
 
+  savedcountdown = {
+    title : countdowntitle,
+    date : countdowndate
+  }
+
+  localStorage.setItem('countdownkey' , JSON.stringify(savedcountdown))
   if(countdowndate === '')
   {
     alert('Please choose your date');
@@ -89,7 +100,24 @@ function newcountdownset()
   countdowndate = '';
 }
 
+function restoreonreload()
+{
+  if(localStorage.getItem('countdownkey'))
+  {
+    inputcontainer.hidden = true;
+    savedcountdown = JSON.parse(localStorage.getItem('countdownkey'));
+    countdowndate = savedcountdown.date;
+    countdowntitle = savedcountdown.title;
+    countdownvalue = new Date(countdowndate).getTime();
+    updateDom();
+  }
+}
+
 countdownform.addEventListener('submit' , updatecountdown);
 countdownbtn.addEventListener('click' , newcountdownset);
 
-completebtn.addEventListener('click' , newcountdownset)
+completebtn.addEventListener('click' , newcountdownset);
+
+
+//on load , check local storage
+restoreonreload();
